@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat or Dog?</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #f4f1eb;
+            color: #2b2b2b;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 50px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.6rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            line-height: 1.1;
+        }
+
+        .header p {
+            margin-top: 8px;
+            color: #7a7a7a;
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 30px;
+            background: #e8e4dc;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 11px 0;
+            border: none;
+            background: transparent;
+            color: #888;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.25s ease;
+        }
+
+        .tab-btn.active {
+            background: #fff;
+            color: #1a1a1a;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+
+        /* Sections */
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* Upload area */
+        .upload-area {
+            border: 1.5px dashed #c5c0b6;
+            border-radius: 12px;
+            padding: 55px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background: rgba(255,255,255,0.4);
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: #8b7355;
+            background: rgba(255,255,255,0.7);
+        }
+
+        .upload-area .label {
+            font-size: 0.95rem;
+            color: #999;
+        }
+
+        .upload-area .label strong {
+            color: #8b7355;
+            font-weight: 500;
+        }
+
+        #fileInput { display: none; }
+
+        /* Preview */
+        .preview-wrap {
+            display: none;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        .preview-wrap img {
+            width: 100%;
+            max-height: 320px;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Camera */
+        .camera-wrap {
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        #cameraFeed {
+            width: 100%;
+            display: block;
+        }
+
+        #cameraCanvas { display: none; }
+
+        .camera-placeholder {
+            padding: 60px 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            background: #eae7e0;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 13px 32px;
+            background: #2b2b2b;
+            color: #f4f1eb;
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            letter-spacing: 0.01em;
+        }
+
+        .btn:hover { background: #444; }
+        .btn:disabled { background: #c5c0b6; cursor: not-allowed; color: #999; }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid #2b2b2b;
+            color: #2b2b2b;
+        }
+
+        .btn-outline:hover { background: #2b2b2b; color: #f4f1eb; }
+        .btn-outline:disabled { border-color: #c5c0b6; color: #aaa; background: transparent; }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-row .btn { flex: 1; text-align: center; }
+
+        /* Result */
+        .result {
+            margin-top: 24px;
+            padding: 24px;
+            background: #fff;
+            border-radius: 12px;
+            display: none;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        .result-top {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #aaa;
+            margin-bottom: 6px;
+        }
+
+        .result h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .result .conf {
+            margin-top: 4px;
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        .conf-bar {
+            margin-top: 14px;
+            height: 6px;
+            background: #e8e4dc;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .conf-fill {
+            height: 100%;
+            background: #8b7355;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+
+        /* Loader */
+        .loader {
+            display: none;
+            margin: 20px auto;
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e8e4dc;
+            border-top-color: #8b7355;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.78rem;
+            color: #bbb;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Cat or Dog?</h1>
+        <p>Upload a photo or use your camera to find out.</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('upload')">Upload</button>
+        <button class="tab-btn" onclick="switchTab('camera')">Camera</button>
+    </div>
+
+    <!-- Upload Section -->
+    <div id="uploadSection" class="section active">
+        <div class="upload-area" id="dropArea" onclick="document.getElementById('fileInput').click()">
+            <p class="label">Click to browse or <strong>drop an image here</strong></p>
+        </div>
+        <input type="file" id="fileInput" accept="image/*">
+
+        <div class="preview-wrap" id="previewWrap">
+            <img id="previewImg">
+        </div>
+
+        <button class="btn" id="uploadBtn" onclick="uploadImage()" disabled style="width:100%;">Classify</button>
+
+        <div class="loader" id="uploadLoader"></div>
+        <div class="result" id="uploadResult">
+            <div class="result-top">Result</div>
+            <h2 id="uploadLabel"></h2>
+            <p class="conf" id="uploadConf"></p>
+            <div class="conf-bar"><div class="conf-fill" id="uploadBar"></div></div>
+        </div>
+    </div>
+
+    <!-- Camera Section -->
+    <div id="cameraSection" class="section">
+        <div id="cameraPlaceholder" class="camera-placeholder">
+            Press the button below to start your camera.
+        </div>
+        <div class="camera-wrap" id="cameraWrap" style="display:none;">
+            <video id="cameraFeed" autoplay playsinline></video>
+        </div>
+        <canvas id="cameraCanvas"></canvas>
+
+        <div class="btn-row">
+            <button class="btn btn-outline" id="startCamBtn" onclick="startCamera()">Start Camera</button>
+            <button class="btn" id="captureBtn" onclick="captureAndPredict()" disabled>Capture</button>
+        </div>
+
+        <div class="loader" id="cameraLoader"></div>
+        <div class="result" id="cameraResult">
+            <div class="result-top">Result</div>
+            <h2 id="cameraLabel"></h2>
+            <p class="conf" id="cameraConf"></p>
+            <div class="conf-bar"><div class="conf-fill" id="cameraBar"></div></div>
+        </div>
+    </div>
+
+    <div class="footer">Built with Flask + TensorFlow</div>
+</div>
+
+<script>
+    let selectedFile = null;
+    let cameraStream = null;
+
+    function switchTab(tab) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        if (tab === 'upload') {
+            document.getElementById('uploadSection').classList.add('active');
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        } else {
+            document.getElementById('cameraSection').classList.add('active');
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        }
+    }
+
+    // Drag and drop
+    const dropArea = document.getElementById('dropArea');
+    ['dragenter','dragover'].forEach(evt => {
+        dropArea.addEventListener(evt, e => { e.preventDefault(); dropArea.style.borderColor = '#8b7355'; });
+    });
+    ['dragleave','drop'].forEach(evt => {
+        dropArea.addEventListener(evt, e => { e.preventDefault(); dropArea.style.borderColor = '#c5c0b6'; });
+    });
+    dropArea.addEventListener('drop', e => {
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            selectedFile = file;
+            showPreview(file);
+        }
+    });
+
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        selectedFile = e.target.files[0];
+        if (selectedFile) showPreview(selectedFile);
+    });
+
+    function showPreview(file) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            document.getElementById('previewImg').src = ev.target.result;
+            document.getElementById('previewWrap').style.display = 'block';
+            document.getElementById('dropArea').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+        document.getElementById('uploadBtn').disabled = false;
+        document.getElementById('uploadResult').style.display = 'none';
+    }
+
+    function uploadImage() {
+        if (!selectedFile) return;
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        document.getElementById('uploadLoader').style.display = 'block';
+        document.getElementById('uploadResult').style.display = 'none';
+
+        fetch('/predict', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('uploadLoader').style.display = 'none';
+                if (data.error) { alert('Error: ' + data.error); return; }
+                document.getElementById('uploadLabel').textContent = data.label;
+                document.getElementById('uploadConf').textContent = data.confidence + '% confidence';
+                document.getElementById('uploadBar').style.width = data.confidence + '%';
+                document.getElementById('uploadResult').style.display = 'block';
+            })
+            .catch(err => {
+                document.getElementById('uploadLoader').style.display = 'none';
+                alert('Something went wrong: ' + err);
+            });
+    }
+
+    function startCamera() {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(stream => {
+                cameraStream = stream;
+                document.getElementById('cameraFeed').srcObject = stream;
+                document.getElementById('cameraWrap').style.display = 'block';
+                document.getElementById('cameraPlaceholder').style.display = 'none';
+                document.getElementById('captureBtn').disabled = false;
+                document.getElementById('startCamBtn').textContent = 'Restart';
+            })
+            .catch(err => alert('Cannot access camera: ' + err.message));
+    }
+
+    function captureAndPredict() {
+        const video = document.getElementById('cameraFeed');
+        const canvas = document.getElementById('cameraCanvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        const imgData = canvas.toDataURL('image/jpeg');
+
+        document.getElementById('cameraLoader').style.display = 'block';
+        document.getElementById('cameraResult').style.display = 'none';
+
+        fetch('/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: imgData })
+        })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('cameraLoader').style.display = 'none';
+                if (data.error) { alert('Error: ' + data.error); return; }
+                document.getElementById('cameraLabel').textContent = data.label;
+                document.getElementById('cameraConf').textContent = data.confidence + '% confidence';
+                document.getElementById('cameraBar').style.width = data.confidence + '%';
+                document.getElementById('cameraResult').style.display = 'block';
+            })
+            .catch(err => {
+                document.getElementById('cameraLoader').style.display = 'none';
+                alert('Something went wrong: ' + err);
+            });
+    }
+</script>
+
+</body>
+</html>
